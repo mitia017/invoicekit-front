@@ -3,7 +3,6 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
-  base: "/invoicekit-front/",
   plugins: [vue()],
   resolve: {
     alias: {
