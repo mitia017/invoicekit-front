@@ -4,7 +4,7 @@
     <div>
       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Client *</label>
       <ClientAutocomplete v-model="form.client_id" />
-      <p v-if="errors.client_id" class="text-red-500 text-sm mt-1">{{ errors.client_id[0] }}</p>
+      <p v-if="errors?.client_id" class="text-red-500 text-sm mt-1">{{ errors.client_id[0] }}</p>
     </div>
 
     <!-- Dates -->
@@ -18,7 +18,9 @@
           v-model="form.issue_date"
           class="mt-1 block w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
         />
-        <p v-if="errors.issue_date" class="text-red-500 text-sm mt-1">{{ errors.issue_date[0] }}</p>
+        <p v-if="errors?.issue_date" class="text-red-500 text-sm mt-1">
+          {{ errors.issue_date[0] }}
+        </p>
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -29,7 +31,7 @@
           v-model="form.due_date"
           class="mt-1 block w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
         />
-        <p v-if="errors.due_date" class="text-red-500 text-sm mt-1">{{ errors.due_date[0] }}</p>
+        <p v-if="errors?.due_date" class="text-red-500 text-sm mt-1">{{ errors.due_date[0] }}</p>
       </div>
     </div>
 
@@ -44,7 +46,7 @@
         <option value="USD">USD ($)</option>
         <option value="MGA">MGA (Ar)</option>
       </select>
-      <p v-if="errors.currency" class="text-red-500 text-sm mt-1">{{ errors.currency[0] }}</p>
+      <p v-if="errors?.currency" class="text-red-500 text-sm mt-1">{{ errors.currency[0] }}</p>
     </div>
 
     <!-- Lignes de facture -->
@@ -90,8 +92,8 @@
       <button type="button" @click="addItem" class="text-blue-500 dark:text-blue-400 text-sm">
         + Ajouter une ligne
       </button>
-      <p v-if="errors.items" class="text-red-500 text-sm mt-1">{{ errors.items[0] }}</p>
-      <p v-if="errors['items.0.description']" class="text-red-500 text-sm mt-1">
+      <p v-if="errors?.items" class="text-red-500 text-sm mt-1">{{ errors.items[0] }}</p>
+      <p v-if="errors?.['items.0.description']" class="text-red-500 text-sm mt-1">
         {{ errors["items.0.description"][0] }}
       </p>
     </div>
@@ -117,10 +119,10 @@
           class="border rounded-lg px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
         />
       </div>
-      <p v-if="errors.discount_type" class="text-red-500 text-sm mt-1">
+      <p v-if="errors?.discount_type" class="text-red-500 text-sm mt-1">
         {{ errors.discount_type[0] }}
       </p>
-      <p v-if="errors.discount_value" class="text-red-500 text-sm mt-1">
+      <p v-if="errors?.discount_value" class="text-red-500 text-sm mt-1">
         {{ errors.discount_value[0] }}
       </p>
     </div>
@@ -133,7 +135,7 @@
         rows="3"
         class="mt-1 block w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
       ></textarea>
-      <p v-if="errors.notes" class="text-red-500 text-sm mt-1">{{ errors.notes[0] }}</p>
+      <p v-if="errors?.notes" class="text-red-500 text-sm mt-1">{{ errors.notes[0] }}</p>
     </div>
 
     <!-- Totaux calculés -->
@@ -178,9 +180,9 @@ const emit = defineEmits<{
 
 const { formatCurrency } = useCurrency();
 
-// Formulaire réactif
+// Formulaire réactif : client_id peut être null (en attendant sélection)
 const form = reactive({
-  client_id: props.initialData?.client_id || null,
+  client_id: props.initialData?.client_id ?? null,
   issue_date: props.initialData?.issue_date || new Date().toISOString().slice(0, 10),
   due_date: props.initialData?.due_date || "",
   currency: props.initialData?.currency || "EUR",
@@ -224,7 +226,7 @@ const taxAmount = computed(() => afterDiscount.value * ((form.tax_rate || 0) / 1
 
 const total = computed(() => afterDiscount.value + taxAmount.value);
 
-// Soumission
+// Soumission – on s'assure que client_id est un nombre (non null)
 const submit = () => {
   // Nettoyer les lignes vides
   const validItems = form.items.filter(
@@ -236,8 +238,13 @@ const submit = () => {
     return;
   }
 
+  if (!form.client_id) {
+    alert("Veuillez sélectionner un client.");
+    return;
+  }
+
   emit("submit", {
-    client_id: form.client_id,
+    client_id: form.client_id, // maintenant garanti non null
     issue_date: form.issue_date,
     due_date: form.due_date,
     currency: form.currency,

@@ -8,77 +8,87 @@
       placeholder="Rechercher un client..."
       class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
     />
-    <ul v-if="showSuggestions && filteredClients.length" class="absolute z-10 w-full bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow mt-1 max-h-48 overflow-auto">
+    <ul
+      v-if="showSuggestions && filteredClients.length"
+      class="absolute z-10 w-full bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow mt-1 max-h-48 overflow-auto"
+    >
       <li
         v-for="client in filteredClients"
         :key="client.id"
         @click="selectClient(client)"
         class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer dark:text-white"
       >
-        {{ client.name }} {{ client.email ? `(${client.email})` : '' }}
+        {{ client.name }} {{ client.email ? `(${client.email})` : "" }}
       </li>
     </ul>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { useClients } from '@/composables/useClients'
-import type { Client } from '@/types'
+import { ref, computed, watch } from "vue";
+import { useClients } from "@/composables/useClients";
+import type { Client } from "@/types";
 
 const props = defineProps<{
-  modelValue?: number
-}>()
+  modelValue?: number | null;
+}>();
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: number | null): void; // ← permettre null
+}>();
 
-const { clients, fetchClients } = useClients()
-const search = ref('')
-const showSuggestions = ref(false)
+const { clients, fetchClients } = useClients();
+const search = ref("");
+const showSuggestions = ref(false);
 
 const filteredClients = computed(() => {
-  if (!search.value) return clients.value
-  const lowerSearch = search.value.toLowerCase()
-  return clients.value.filter(c => 
-    c.name.toLowerCase().includes(lowerSearch) || 
-    (c.email && c.email.toLowerCase().includes(lowerSearch))
-  )
-})
+  if (!search.value) return clients.value;
+  const lowerSearch = search.value.toLowerCase();
+  return clients.value.filter(
+    (c) =>
+      c.name.toLowerCase().includes(lowerSearch) ||
+      (c.email && c.email.toLowerCase().includes(lowerSearch)),
+  );
+});
 
 const onSearch = () => {
-  showSuggestions.value = true
+  showSuggestions.value = true;
   if (!clients.value.length) {
-    fetchClients()
+    fetchClients();
   }
-}
+};
 
 const onFocus = () => {
-  showSuggestions.value = true
+  showSuggestions.value = true;
   if (!clients.value.length) {
-    fetchClients()
+    fetchClients();
   }
-}
+};
 
 const selectClient = (client: Client) => {
-  emit('update:modelValue', client.id)
-  search.value = client.name
-  showSuggestions.value = false
-}
+  emit("update:modelValue", client.id);
+  search.value = client.name;
+  showSuggestions.value = false;
+};
 
-watch(() => props.modelValue, async (newVal) => {
-  if (newVal) {
-    const client = clients.value.find(c => c.id === newVal)
-    if (client) {
-      search.value = client.name
-    } else {
-      try {
-        const response = await fetch(`/api/clients/${newVal}`)
-        const data = await response.json()
-        search.value = data.name
-      } catch (e) {
-        console.error(e)
+watch(
+  () => props.modelValue,
+  async (newVal) => {
+    if (newVal) {
+      const client = clients.value.find((c) => c.id === newVal);
+      if (client) {
+        search.value = client.name;
+      } else {
+        try {
+          const response = await fetch(`/api/clients/${newVal}`);
+          const data = await response.json();
+          search.value = data.name;
+        } catch (e) {
+          console.error(e);
+        }
       }
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+);
 </script>
