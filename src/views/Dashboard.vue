@@ -235,9 +235,9 @@ const stats = ref({
   monthly_progress: 0,
   monthly_goal: 0,
 });
-const monthlyRevenue = ref([]);
-const topClients = ref([]);
-const recentInvoices = ref([]);
+const monthlyRevenue = ref<any[]>([]);
+const topClients = ref<any[]>([]);
+const recentInvoices = ref<any[]>([]);
 const revenueChart = ref<HTMLCanvasElement | null>(null);
 
 // Variations mensuelles

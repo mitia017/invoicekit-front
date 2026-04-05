@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import axios from '@/plugins/axios'
-import { useThemeStore } from './theme'
 
 interface User {
   id: number
@@ -54,7 +53,7 @@ export const useAuthStore = defineStore('auth', {
         try {
           const response = await axios.get('/api/user')
           this.user = response.data
-        } catch (error) {
+        } catch {
           this.logout()
         }
       }

@@ -1,48 +1,89 @@
-# frontend
+# 🚀 InvoiceKit - Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+InvoiceKit est une application moderne de gestion de facturation conçue pour simplifier la vie des entrepreneurs et des petites entreprises. Cette interface élégante et intuitive permet de gérer vos clients, de suivre vos factures et d'analyser vos revenus en un coup d'œil.
 
-## Recommended IDE Setup
+---
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## ✨ Fonctionnalités Clés
 
-## Recommended Browser Setup
+- 📊 **Tableau de Bord Intuitif** : Visualisez vos revenus mensuels avec des graphiques dynamiques.
+- 🧾 **Gestion des Factures** : Créez, modifiez et suivez l'état de vos factures (payées, en attente).
+- 👥 **Gestion des Clients** : Centralisez les informations de vos clients pour une facturation rapide.
+- 🌓 **Mode Sombre** : Une interface qui s'adapte à vos préférences pour un confort visuel optimal.
+- 🔐 **Authentification Sécurisée** : Système complet d'inscription et de connexion.
+- 📱 **Design Responsive** : Une expérience fluide sur ordinateur, tablette et mobile grâce à Tailwind CSS.
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+---
 
-## Type Support for `.vue` Imports in TS
+## 🛠️ Stack Technique
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+L'application repose sur les technologies les plus performantes de l'écosystème web moderne :
 
-## Customize configuration
+- **Framework** : [Vue 3](https://vuejs.org/) (Composition API)
+- **Build Tool** : [Vite](https://vitejs.dev/)
+- **Gestion d'État** : [Pinia](https://pinia.vuejs.org/)
+- **Routage** : [Vue Router](https://router.vuejs.org/)
+- **Styling** : [Tailwind CSS](https://tailwindcss.com/)
+- **Graphiques** : [Chart.js](https://www.chartjs.org/) & [vue-chartjs](https://vue-chartjs.org/)
+- **Client HTTP** : [Axios](https://axios-http.com/)
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+---
 
-## Project Setup
+## 📸 Aperçu
 
-```sh
+### Page de Connexion
+![Connexion](./public/screenshots/login.png)
+
+### Page d'Inscription
+![Inscription](./public/screenshots/register.png)
+
+---
+
+## 🚀 Installation & Lancement
+
+### Prérequis
+- Node.js (version 20.19.0 ou supérieure)
+- npm
+
+### Installation des dépendances
+```bash
 npm install
 ```
 
-### Compile and Hot-Reload for Development
-
-```sh
+### Lancement en mode développement
+```bash
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
-
-```sh
+### Construction pour la production
+```bash
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
+### Vérification du code (Linting)
+```bash
 npm run lint
 ```
+
+---
+
+## 📂 Structure du Projet
+
+```text
+src/
+├── assets/         # Ressources statiques (images, styles globaux)
+├── components/     # Composants Vue réutilisables
+├── composables/    # Logique métier partagée (Hooks)
+├── plugins/        # Configuration des plugins (Axios, etc.)
+├── router/         # Configuration des routes de l'application
+├── stores/         # Gestion de l'état avec Pinia
+├── views/          # Pages de l'application
+├── App.vue         # Composant racine
+└── main.ts         # Point d'entrée de l'application
+```
+
+---
+
+## 📝 Licence
+
+Ce projet est sous licence MIT.
