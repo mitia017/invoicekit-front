@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
+  base: "/invoicekit-front/",
   plugins: [vue()],
   resolve: {
     alias: {
@@ -14,14 +15,6 @@ export default defineConfig({
       "/api": {
         target: "http://localhost:8000",
         changeOrigin: true,
-      },
-    },
-  },
-  build: {
-    rollupOptions: {
-      input: {
-        main: "index.html",
-        notFound: "404.html",
       },
     },
   },
