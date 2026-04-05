@@ -4,6 +4,10 @@ InvoiceKit est une application moderne de gestion de facturation conçue pour si
 
 ---
 
+### Tableau de bord
+
+![Dashboard](./public/screenshots/dashboard.png)
+
 ## ✨ Fonctionnalités Clés
 
 - 📊 **Tableau de Bord Intuitif** : Visualisez vos revenus mensuels avec des graphiques dynamiques.
@@ -32,9 +36,11 @@ L'application repose sur les technologies les plus performantes de l'écosystèm
 ## 📸 Aperçu
 
 ### Page de Connexion
+
 ![Connexion](./public/screenshots/login.png)
 
 ### Page d'Inscription
+
 ![Inscription](./public/screenshots/register.png)
 
 ---
@@ -42,25 +48,30 @@ L'application repose sur les technologies les plus performantes de l'écosystèm
 ## 🚀 Installation & Lancement
 
 ### Prérequis
+
 - Node.js (version 20.19.0 ou supérieure)
 - npm
 
 ### Installation des dépendances
+
 ```bash
 npm install
 ```
 
 ### Lancement en mode développement
+
 ```bash
 npm run dev
 ```
 
 ### Construction pour la production
+
 ```bash
 npm run build
 ```
 
 ### Vérification du code (Linting)
+
 ```bash
 npm run lint
 ```
