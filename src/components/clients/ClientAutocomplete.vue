@@ -26,24 +26,27 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { useClients } from "@/composables/useClients";
+import { useClientStore } from "@/stores/clients";
 import type { Client } from "@/types";
+import { storeToRefs } from "pinia";
 
 const props = defineProps<{
   modelValue?: number | null;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: number | null): void; // ← permettre null
+  (e: "update:modelValue", value: number | null): void;
 }>();
 
-const { clients, fetchClients } = useClients();
+const clientStore = useClientStore();
+const { clients } = storeToRefs(clientStore);
+const { fetchClients } = clientStore;
 const search = ref("");
 const showSuggestions = ref(false);
 
 const filteredClients = computed(() => {
   if (!search.value) return clients.value;
-  const lowerSearch = search.value.toLowerCase();
+  const lowerSearch = search.value.trim().toLowerCase();
   return clients.value.filter(
     (c) =>
       c.name.toLowerCase().includes(lowerSearch) ||

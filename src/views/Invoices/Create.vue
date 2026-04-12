@@ -8,12 +8,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useInvoices } from "@/composables/useInvoices";
+import { useInvoiceStore } from "@/stores/invoices";
 import InvoiceForm from "@/components/invoices/InvoiceForm.vue";
 import type { InvoiceFormData } from "@/types";
 
 const router = useRouter();
-const { createInvoice } = useInvoices();
+const { createInvoice } = useInvoiceStore();
 const errors = ref<Record<string, string[]>>({});
 
 const handleSubmit = async (data: InvoiceFormData) => {

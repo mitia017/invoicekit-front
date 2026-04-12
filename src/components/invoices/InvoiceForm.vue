@@ -1,13 +1,10 @@
 <template>
   <form @submit.prevent="submit" class="space-y-6">
-    <!-- Client -->
     <div>
       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Client *</label>
       <ClientAutocomplete v-model="form.client_id" />
       <p v-if="errors?.client_id" class="text-red-500 text-sm mt-1">{{ errors.client_id[0] }}</p>
     </div>
-
-    <!-- Dates -->
     <div class="grid grid-cols-2 gap-4">
       <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"

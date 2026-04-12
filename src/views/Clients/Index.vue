@@ -117,10 +117,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useClients } from "@/composables/useClients";
+import { useClientStore } from "@/stores/clients";
 import type { Client } from "@/types";
+import { storeToRefs } from "pinia";
 
-const { clients, fetchClients, createClient, updateClient, deleteClient } = useClients();
+const clientStore = useClientStore();
+
+const { clients } = storeToRefs(clientStore);
+const { createClient, updateClient, deleteClient, fetchClients } = useClientStore();
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const form = ref<Partial<Client>>({});

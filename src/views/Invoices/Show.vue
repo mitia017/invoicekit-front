@@ -171,12 +171,12 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "@/plugins/axios";
 import { useCurrency } from "@/composables/useCurrency";
-import { useInvoices } from "@/composables/useInvoices";
+import { useInvoiceStore } from "@/stores/invoices";
 
 const route = useRoute();
 const router = useRouter();
 const { formatCurrency } = useCurrency();
-const { downloadPDF } = useInvoices();
+const { downloadPDF } = useInvoiceStore();
 
 // État de la facture
 const invoice = ref<any>(null);

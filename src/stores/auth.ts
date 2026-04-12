@@ -1,67 +1,75 @@
 import { defineStore } from "pinia";
+import { ref, computed } from "vue";
 import axios from "@/plugins/axios";
+import type { User } from "@/types/index";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
+export const useAuthStore = defineStore("auth", () => {
+  const user = ref<User | null>(null);
+  const token = ref<string | null>(localStorage.getItem("token"));
 
-export const useAuthStore = defineStore("auth", {
-  state: () => ({
-    user: null as User | null,
-    token: localStorage.getItem("token") || null,
-  }),
-  getters: {
-    isAuthenticated: (state) => !!state.token,
-  },
-  actions: {
-    async login(email: string, password: string) {
+  const isAuthenticated = computed(() => !!token.value);
+
+  async function login(email: string, password: string) {
+    try {
+      const response = await axios.post("/api/login", { email, password });
+
+      token.value = response.data.token;
+      user.value = response.data.user;
+
+      if (token.value) {
+        localStorage.setItem("token", token.value);
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token.value}`;
+      }
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  async function register(name: string, email: string, password: string) {
+    try {
+      const response = await axios.post("/api/register", { name, email, password });
+
+      token.value = response.data.token;
+      user.value = response.data.user;
+
+      if (token.value) {
+        localStorage.setItem("token", token.value);
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token.value}`;
+      }
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  function logout() {
+    token.value = null;
+    user.value = null;
+    localStorage.removeItem("token");
+    delete axios.defaults.headers.common["Authorization"];
+  }
+
+  async function fetchUser() {
+    if (token.value) {
       try {
-        const response = await axios.post("/api/login", { email, password });
-        this.token = response.data.token;
-        this.user = response.data.user;
-        if (this.token) {
-          localStorage.setItem("token", this.token);
-          axios.defaults.headers.common["Authorization"] = `Bearer ${this.token}`;
-        }
-        return true;
-      } catch (error) {
-        console.error(error);
-        return false;
+        const response = await axios.get("/api/user");
+        user.value = response.data;
+      } catch {
+        logout();
       }
-    },
+    }
+  }
 
-    async register(name: string, email: string, password: string) {
-      try {
-        const response = await axios.post("/api/register", { name, email, password });
-        this.token = response.data.token;
-        this.user = response.data.user;
-        if (this.token) {
-          localStorage.setItem("token", this.token);
-          axios.defaults.headers.common["Authorization"] = `Bearer ${this.token}`;
-        }
-        return true;
-      } catch (error) {
-        console.error(error);
-        return false;
-      }
-    },
-    logout() {
-      this.token = null;
-      this.user = null;
-      localStorage.removeItem("token");
-      delete axios.defaults.headers.common["Authorization"];
-    },
-    async fetchUser() {
-      if (this.token) {
-        try {
-          const response = await axios.get("/api/user");
-          this.user = response.data;
-        } catch {
-          this.logout();
-        }
-      }
-    },
-  },
+  return {
+    user,
+    token,
+    isAuthenticated,
+    login,
+    register,
+    logout,
+    fetchUser,
+  };
 });

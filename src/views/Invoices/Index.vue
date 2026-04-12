@@ -219,11 +219,14 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed } from "vue";
-import { useInvoices } from "@/composables/useInvoices";
+import { useInvoiceStore } from "@/stores/invoices";
 import { useCurrency } from "@/composables/useCurrency";
 import axios from "@/plugins/axios";
+import { storeToRefs } from "pinia";
 
-const { invoices, deleteInvoice, downloadPDF } = useInvoices();
+const invoiceStore = useInvoiceStore();
+const { invoices } = storeToRefs(invoiceStore);
+const { deleteInvoice, downloadPDF } = invoiceStore;
 const { formatCurrency } = useCurrency();
 const pagination = ref<any>(null);
 
