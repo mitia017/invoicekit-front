@@ -201,6 +201,17 @@ const fetchInvoice = async () => {
   }
 };
 
+const statusText = (status: string) => {
+  const map: Record<string, string> = {
+    draft: "Brouillon",
+    sent: "Envoyée",
+    paid: "Payée",
+    overdue: "En retard",
+  };
+
+  return map[status] ?? status;
+};
+
 const sendInvoice = async () => {
   if (!invoice.value || !sendEmail.value) return;
 
@@ -258,6 +269,17 @@ const checkStripeReturn = () => {
     alert("Paiement annulé.");
     router.replace({ query: {} });
   }
+};
+
+const statusClass = (status: string) => {
+  const map: Record<string, string> = {
+    draft: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
+    sent: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+    paid: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+    overdue: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+  };
+
+  return map[status] ?? map.draft;
 };
 
 onMounted(async () => {

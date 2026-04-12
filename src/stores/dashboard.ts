@@ -1,0 +1,95 @@
+import { defineStore } from "pinia";
+import { ref } from "vue";
+import axios from "@/plugins/axios";
+
+export interface DashboardStats {
+  total_revenue: number;
+  paid_invoices_count: number;
+  pending_invoices_count: number;
+  monthly_variation: number;
+  quarterly_variation: number;
+  monthly_progress: number;
+  monthly_goal: number;
+}
+
+export interface RevenueItem {
+  month: string;
+  total: number;
+}
+
+export interface ClientStats {
+  id: number;
+  name: string;
+  invoices_count: number;
+  total_spent: number;
+}
+
+export interface RecentInvoice {
+  id: number;
+  number: string;
+  client_name: string;
+  total: number;
+  created_at: string;
+}
+
+export const useDashboardStore = defineStore("dashboard", () => {
+  // state
+  const stats = ref<DashboardStats>({
+    total_revenue: 0,
+    paid_invoices_count: 0,
+    pending_invoices_count: 0,
+    monthly_variation: 0,
+    quarterly_variation: 0,
+    monthly_progress: 0,
+    monthly_goal: 0,
+  });
+
+  const revenue = ref<RevenueItem[]>([]);
+  const topClients = ref<ClientStats[]>([]);
+  const recentInvoices = ref<RecentInvoice[]>([]);
+
+  const loading = ref(false);
+  const error = ref<string | null>(null);
+
+  // action principale
+  const fetchDashboard = async () => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const [statsRes, revenueRes, clientsRes, invoicesRes] = await Promise.all([
+        axios.get("/api/dashboard/stats"),
+        axios.get("/api/dashboard/revenue"),
+        axios.get("/api/dashboard/top-clients"),
+        axios.get("/api/dashboard/recent-invoices"),
+      ]);
+
+      stats.value = {
+        ...stats.value,
+        ...statsRes.data,
+      };
+
+      const revenueData = revenueRes.data;
+      revenue.value = Array.isArray(revenueData)
+        ? revenueData
+        : Object.values(revenueData).sort((a: any, b: any) => a.month - b.month);
+
+      topClients.value = clientsRes.data;
+      recentInvoices.value = invoicesRes.data;
+    } catch (e: any) {
+      error.value = e?.message || "Erreur chargement dashboard";
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  return {
+    stats,
+    revenue,
+    topClients,
+    recentInvoices,
+    loading,
+    error,
+    fetchDashboard,
+  };
+});
