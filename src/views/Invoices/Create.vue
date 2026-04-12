@@ -1,7 +1,8 @@
 <template>
   <div class="p-6 max-w-4xl mx-auto dark:bg-gray-900 min-h-screen">
     <h1 class="text-2xl font-bold mb-6 dark:text-white">Créer une facture</h1>
-    <InvoiceForm @submit="handleSubmit" :errors="errors" />
+
+    <InvoiceForm @submit="createFacture" :errors="errors" :loading="creating" />
   </div>
 </template>
 
@@ -11,21 +12,37 @@ import { useRouter } from "vue-router";
 import { useInvoiceStore } from "@/stores/invoices";
 import InvoiceForm from "@/components/invoices/InvoiceForm.vue";
 import type { InvoiceFormData } from "@/types";
+import type { AxiosError } from "axios";
 
 const router = useRouter();
-const { createInvoice } = useInvoiceStore();
-const errors = ref<Record<string, string[]>>({});
+const invoiceStore = useInvoiceStore();
 
-const handleSubmit = async (data: InvoiceFormData) => {
+const errors = ref<Record<string, string[]>>({});
+const creating = ref(false);
+
+const createFacture = async (data: InvoiceFormData) => {
+  if (creating.value) return;
+
+  errors.value = {};
+  creating.value = true;
+
   try {
-    await createInvoice(data);
-    router.push("/invoices");
-  } catch (error: any) {
+    await invoiceStore.createInvoice(data);
+
+    router.push({ name: "invoices.list" });
+  } catch (err) {
+    const error = err as AxiosError<{ errors?: Record<string, string[]> }>;
+
     if (error.response?.status === 422) {
-      errors.value = error.response.data.errors || {};
-    } else {
-      alert("Erreur lors de la création de la facture");
+      errors.value = error.response.data?.errors ?? {};
+      return;
     }
+
+    console.error("Erreur création facture", error);
+
+    alert("Impossible de créer la facture. Réessaie.");
+  } finally {
+    creating.value = false;
   }
 };
 </script>

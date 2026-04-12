@@ -77,7 +77,7 @@ const handleRegister = async () => {
     const success = await authStore.register(name.value, email.value, password.value);
 
     if (success) {
-      router.push("/");
+      router.push({ name: "dashboard" });
     } else {
       errorMessage.value = "Erreur d'inscription";
     }

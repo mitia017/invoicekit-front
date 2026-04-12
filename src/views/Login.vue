@@ -67,7 +67,7 @@ const handleLogin = async () => {
     const result = await authStore.login(email.value, password.value);
 
     if (result.success) {
-      router.push("/");
+      router.push({ name: "dashboard" });
     } else {
       error.value = `Erreur: ${result.message}`;
     }

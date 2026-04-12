@@ -10,35 +10,51 @@ import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
 
 const routes = [
-  { path: "/login", component: Login, meta: { guest: true } },
-  { path: "/register", component: Register, meta: { guest: true } },
+  {
+    path: "/login",
+    component: Login,
+    name: "login",
+    meta: { guest: true },
+  },
+  {
+    path: "/register",
+    component: Register,
+    name: "register",
+    meta: { guest: true },
+  },
   {
     path: "/",
+    name: "dashboard",
     component: Dashboard,
     meta: { requiresAuth: true },
   },
   {
     path: "/invoices",
+    name: "invoices.list",
     component: InvoicesIndex,
     meta: { requiresAuth: true },
   },
   {
     path: "/invoices/create",
+    name: "invoices.create",
     component: InvoiceCreate,
     meta: { requiresAuth: true },
   },
   {
     path: "/invoices/:id/edit",
+    name: "invoices.edit",
     component: InvoiceEdit,
     meta: { requiresAuth: true },
   },
   {
     path: "/invoices/:id",
+    name: "invoices.show",
     component: InvoiceShow,
     meta: { requiresAuth: true },
   },
   {
     path: "/clients",
+    name: "clients.list",
     component: ClientsIndex,
     meta: { requiresAuth: true },
   },
@@ -49,15 +65,17 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
   const authStore = useAuthStore();
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next("/login");
-  } else if (to.meta.guest && authStore.isAuthenticated) {
-    next("/");
-  } else {
-    next();
+    return "/login";
   }
+
+  if (to.meta.guest && authStore.isAuthenticated) {
+    return "/";
+  }
+
+  return true;
 });
 
 export default router;

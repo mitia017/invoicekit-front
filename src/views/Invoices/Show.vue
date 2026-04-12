@@ -172,103 +172,89 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "@/plugins/axios";
 import { useCurrency } from "@/composables/useCurrency";
 import { useInvoiceStore } from "@/stores/invoices";
+import type { Invoice, AxiosError } from "@/types";
 
 const route = useRoute();
 const router = useRouter();
 const { formatCurrency } = useCurrency();
 const { downloadPDF } = useInvoiceStore();
 
-// État de la facture
-const invoice = ref<any>(null);
+const invoice = ref<Invoice | null>(null);
 const loading = ref(true);
 
-// État pour l'envoi email
 const showSendModal = ref(false);
 const sendEmail = ref("");
 const sending = ref(false);
-
-// État pour le paiement Stripe
 const paying = ref(false);
 
-// Classes et textes de statut
-const statusClass = (status: string) => {
-  const classes: Record<string, string> = {
-    draft: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
-    sent: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-    paid: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-    overdue: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-  };
-  return classes[status] || classes.draft;
-};
+const getId = (): number => Number(route.params.id);
 
-const statusText = (status: string) => {
-  const texts: Record<string, string> = {
-    draft: "Brouillon",
-    sent: "Envoyée",
-    paid: "Payée",
-    overdue: "En retard",
-  };
-  return texts[status] || status;
-};
-
-// Charger la facture depuis l'API
 const fetchInvoice = async () => {
-  const id = route.params.id;
   try {
-    const response = await axios.get(`/api/invoices/${id}`);
-    invoice.value = response.data;
-  } catch (error) {
-    console.error(error);
-    alert("Impossible de charger la facture");
+    const { data } = await axios.get<Invoice>(`/api/invoices/${getId()}`);
+    invoice.value = data;
+  } catch (err) {
+    console.error("Erreur chargement facture", err);
+    alert("Impossible de charger la facture.");
   } finally {
     loading.value = false;
   }
 };
 
-// Envoyer la facture par email
 const sendInvoice = async () => {
-  if (!sendEmail.value) return;
+  if (!invoice.value || !sendEmail.value) return;
+
   sending.value = true;
+
   try {
-    await axios.post(`/api/invoices/${invoice.value.id}/send`, { email: sendEmail.value });
-    alert("Facture envoyée avec succès !");
+    await axios.post(`/api/invoices/${invoice.value.id}/send`, {
+      email: sendEmail.value,
+    });
+
     showSendModal.value = false;
     sendEmail.value = "";
-    // Recharger la facture (le statut peut passer à "envoyée")
     await fetchInvoice();
-  } catch (error: any) {
-    console.error(error);
-    alert(error.response?.data?.message || "Erreur lors de l'envoi");
+  } catch (err) {
+    const error = err as AxiosError<{ message?: string }>;
+    console.error("Erreur envoi facture", error);
+
+    alert(error.response?.data?.message ?? "Échec de l'envoi.");
   } finally {
     sending.value = false;
   }
 };
 
-// Payer via Stripe
 const payInvoice = async () => {
+  if (!invoice.value) return;
+
   paying.value = true;
+
   try {
-    const response = await axios.post(`/api/invoices/${invoice.value.id}/checkout`, {
+    const { data } = await axios.post(`/api/invoices/${invoice.value.id}/checkout`, {
       success_url: window.location.href,
       cancel_url: window.location.href,
     });
-    // Rediriger vers Stripe Checkout
-    window.location.href = response.data.url;
-  } catch (error: any) {
-    console.error(error);
-    alert(error.response?.data?.message || "Erreur lors de l'initialisation du paiement");
+
+    window.location.href = data.url;
+  } catch (err) {
+    const error = err as AxiosError<{ message?: string }>;
+    console.error("Erreur paiement", error);
+
+    alert(error.response?.data?.message ?? "Impossible de lancer le paiement.");
     paying.value = false;
   }
 };
 
-// Vérifier le retour de Stripe (query params)
 const checkStripeReturn = () => {
-  if (route.query.payment === "success") {
-    alert("Paiement réussi ! La facture est maintenant payée.");
-    fetchInvoice(); // recharger pour mettre à jour le statut
-    // Nettoyer l'URL
+  const status = route.query.payment;
+
+  if (status === "success") {
+    alert("Paiement validé.");
+    fetchInvoice();
     router.replace({ query: {} });
-  } else if (route.query.payment === "cancel") {
+  }
+
+  if (status === "cancel") {
     alert("Paiement annulé.");
     router.replace({ query: {} });
   }

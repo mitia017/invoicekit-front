@@ -6,14 +6,22 @@ import type { Invoice, InvoiceFormData } from "@/types";
 export const useInvoiceStore = defineStore("invoices", () => {
   const invoices = ref<Invoice[]>([]);
   const loading = ref(false);
+  const pagination = ref(null);
 
   const fetchInvoices = async (params = {}) => {
     loading.value = true;
+
     try {
-      const response = await axios.get("/api/invoices", { params });
-      invoices.value = response.data.data;
-    } catch (error) {
-      console.error("Erreur lors de la récupération :", error);
+      const { data } = await axios.get("/api/invoices", { params });
+
+      invoices.value = data.data;
+
+      pagination.value = {
+        current_page: data.current_page,
+        last_page: data.last_page,
+        prev_page_url: data.prev_page_url,
+        next_page_url: data.next_page_url,
+      };
     } finally {
       loading.value = false;
     }
@@ -50,6 +58,7 @@ export const useInvoiceStore = defineStore("invoices", () => {
   return {
     invoices,
     loading,
+    pagination,
     fetchInvoices,
     createInvoice,
     updateInvoice,
