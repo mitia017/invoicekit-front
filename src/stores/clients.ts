@@ -69,6 +69,7 @@ export const useClientStore = defineStore("client", () => {
     clients,
     loading,
     fetchClients,
+    fetchClientById,
     createClient,
     updateClient,
     deleteClient,

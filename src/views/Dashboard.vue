@@ -239,8 +239,6 @@ const monthlyRevenue = ref<any[]>([]);
 const topClients = ref<any[]>([]);
 const recentInvoices = ref<any[]>([]);
 const revenueChart = ref<HTMLCanvasElement | null>(null);
-
-// Variations mensuelles
 const monthlyVariationText = computed(() => {
   const val = stats.value.monthly_variation;
   if (val === undefined) return "+0.0%";
@@ -251,8 +249,6 @@ const monthlyVariationClass = computed(() => {
   if (val === undefined) return "";
   return val >= 0 ? "text-green-600 dark:text-green-200" : "text-red-600 dark:text-red-200";
 });
-
-// Variations trimestrielles
 const quarterlyVariationText = computed(() => {
   const val = stats.value.quarterly_variation;
   if (val === undefined) return "+0.0%";

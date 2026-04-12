@@ -20,10 +20,17 @@ export const useAuthStore = defineStore("auth", () => {
         localStorage.setItem("token", token.value);
         axios.defaults.headers.common["Authorization"] = `Bearer ${token.value}`;
       }
-      return true;
-    } catch (error) {
-      console.error(error);
-      return false;
+
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        status: error?.response?.status,
+        message: error?.response?.data?.message || "Erreur serveur",
+      };
     }
   }
 

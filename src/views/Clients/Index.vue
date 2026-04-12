@@ -104,9 +104,10 @@
             </button>
             <button
               @click="saveClient"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              :disabled="saving"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
-              Enregistrer
+              {{ saving ? "Enregistrement..." : "Enregistrer" }}
             </button>
           </div>
         </div>
@@ -124,11 +125,12 @@ import { storeToRefs } from "pinia";
 const clientStore = useClientStore();
 
 const { clients } = storeToRefs(clientStore);
-const { createClient, updateClient, deleteClient, fetchClients } = useClientStore();
+const { createClient, updateClient, deleteClient, fetchClients } = clientStore;
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const form = ref<Partial<Client>>({});
-const editingId = ref<number | null>(null);
+const editingClient = ref<number | null>(null);
+const saving = ref(false);
 
 onMounted(() => {
   fetchClients();
@@ -138,22 +140,33 @@ const closeModal = () => {
   showCreateModal.value = false;
   showEditModal.value = false;
   form.value = {};
-  editingId.value = null;
+  editingClient.value = null;
 };
 
 const saveClient = async () => {
-  if (editingId.value) {
-    await updateClient(editingId.value, form.value);
-  } else {
-    await createClient(form.value);
+  if (saving.value) return;
+
+  saving.value = true;
+
+  try {
+    if (editingClient.value) {
+      await updateClient(editingClient.value, form.value);
+    } else {
+      await createClient(form.value);
+    }
+
+    closeModal();
+    fetchClients();
+  } catch (error) {
+    console.error(error);
+  } finally {
+    saving.value = false;
   }
-  closeModal();
-  fetchClients();
 };
 
 const editClient = (client: Client) => {
   form.value = { ...client };
-  editingId.value = client.id;
+  editingClient.value = client.id;
   showEditModal.value = true;
 };
 </script>
