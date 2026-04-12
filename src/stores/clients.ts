@@ -21,6 +21,16 @@ export const useClientStore = defineStore("client", () => {
     }
   };
 
+  const fetchClientById = async (id: number) => {
+    try {
+      const response = await axios.get(`/api/clients/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erreur lors de la récupération du client:", error);
+      throw error;
+    }
+  };
+
   const createClient = async (data: Partial<Client>) => {
     try {
       const response = await axios.post("/api/clients", data);

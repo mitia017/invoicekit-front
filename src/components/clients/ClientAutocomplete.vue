@@ -2,23 +2,23 @@
   <div class="relative">
     <input
       type="text"
-      v-model="search"
-      @input="onSearch"
-      @focus="onFocus"
-      placeholder="Rechercher un client..."
+      v-model="clientFilterSearch"
+      @input="openSearch"
+      @focus="openSearch"
+      placeholder="Rechercher un clientItem..."
       class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
     />
     <ul
-      v-if="showSuggestions && filteredClients.length"
+      v-if="showSuggestions && matchedClients.length"
       class="absolute z-10 w-full bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow mt-1 max-h-48 overflow-auto"
     >
       <li
-        v-for="client in filteredClients"
-        :key="client.id"
-        @click="selectClient(client)"
+        v-for="clientItem in matchedClients"
+        :key="clientItem.id"
+        @click="selectClient(clientItem)"
         class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer dark:text-white"
       >
-        {{ client.name }} {{ client.email ? `(${client.email})` : "" }}
+        {{ clientItem.name }} {{ clientItem.email ? `(${clientItem.email})` : "" }}
       </li>
     </ul>
   </div>
@@ -41,51 +41,43 @@ const emit = defineEmits<{
 const clientStore = useClientStore();
 const { clients } = storeToRefs(clientStore);
 const { fetchClients } = clientStore;
-const search = ref("");
+const clientFilterSearch = ref("");
 const showSuggestions = ref(false);
 
-const filteredClients = computed(() => {
-  if (!search.value) return clients.value;
-  const lowerSearch = search.value.trim().toLowerCase();
+const matchedClients = computed(() => {
+  if (!clientFilterSearch.value) return clients.value;
+  const searchQuery = clientFilterSearch.value.trim().toLowerCase();
   return clients.value.filter(
-    (c) =>
-      c.name.toLowerCase().includes(lowerSearch) ||
-      (c.email && c.email.toLowerCase().includes(lowerSearch)),
+    (clientItem: Client) =>
+      clientItem.name.toLowerCase().includes(searchQuery) ||
+      (clientItem.email && clientItem.email.toLowerCase().includes(searchQuery)),
   );
 });
 
-const onSearch = () => {
+const openSearch = () => {
   showSuggestions.value = true;
   if (!clients.value.length) {
     fetchClients();
   }
 };
 
-const onFocus = () => {
-  showSuggestions.value = true;
-  if (!clients.value.length) {
-    fetchClients();
-  }
-};
-
-const selectClient = (client: Client) => {
-  emit("update:modelValue", client.id);
-  search.value = client.name;
+const selectClient = (clientItem) => {
+  emit("update:modelValue", clientItem.id);
+  clientFilterSearch.value = clientItem.name;
   showSuggestions.value = false;
 };
 
 watch(
   () => props.modelValue,
-  async (newVal) => {
-    if (newVal) {
-      const client = clients.value.find((c) => c.id === newVal);
-      if (client) {
-        search.value = client.name;
+  async (selectedClientId) => {
+    if (selectedClientId) {
+      const clientItem = clients.value.find((clientItem) => clientItem.id === selectedClientId);
+      if (clientItem) {
+        clientFilterSearch.value = clientItem.name;
       } else {
         try {
-          const response = await fetch(`/api/clients/${newVal}`);
-          const data = await response.json();
-          search.value = data.name;
+          const clientData = await clientStore.fetchClientById(selectedClientId);
+          clientFilterSearch.value = clientData.name;
         } catch (e) {
           console.error(e);
         }
