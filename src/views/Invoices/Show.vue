@@ -3,7 +3,7 @@
     <!-- Chargement -->
     <div v-if="loading" class="text-center dark:text-white py-10">Chargement de la facture...</div>
 
-    <div v-else>
+    <div v-else-if="invoice">
       <!-- En-tête + actions -->
       <div class="flex justify-between items-center mb-6 flex-wrap gap-2">
         <h1 class="text-2xl font-bold dark:text-white">Facture {{ invoice.invoice_number }}</h1>
@@ -163,6 +163,12 @@
         </div>
       </div>
     </div>
+
+    <div v-else-if="!loading" class="text-center dark:text-white py-10">
+      <p class="text-red-600 dark:text-red-400">
+        Facture introuvable ou erreur lors du chargement.
+      </p>
+    </div>
   </div>
 </template>
 
@@ -173,7 +179,8 @@ import axios from "@/plugins/axios";
 import { useCurrency } from "@/composables/useCurrency";
 import { useInvoiceStore } from "@/stores/invoices";
 import { useNotificationStore } from "@/stores/notifications";
-import type { Invoice, AxiosError } from "@/types";
+import type { Invoice, ApiErrorResponse } from "@/types";
+import type { AxiosError } from "axios";
 
 const route = useRoute();
 const router = useRouter();
@@ -228,7 +235,7 @@ const sendInvoice = async () => {
     notificationStore.success("Facture envoyée avec succès.");
     await fetchInvoice();
   } catch (err) {
-    const error = err as AxiosError<{ message?: string }>;
+    const error = err as AxiosError<ApiErrorResponse>;
     notificationStore.handleApiError(error, "Échec de l'envoi.");
   } finally {
     sending.value = false;
@@ -248,7 +255,7 @@ const payInvoice = async () => {
 
     window.location.href = data.url;
   } catch (err) {
-    const error = err as AxiosError<{ message?: string }>;
+    const error = err as AxiosError<ApiErrorResponse>;
     notificationStore.handleApiError(error, "Impossible de lancer le paiement.");
     paying.value = false;
   }
