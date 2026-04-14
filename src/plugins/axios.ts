@@ -1,6 +1,7 @@
 import axios from "axios";
 
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+axios.defaults.baseURL =
+  import.meta.env.VITE_API_URL || "https://invoicelit-back-main-15mjc4.free.laravel.cloud/";
 axios.defaults.withCredentials = true;
 
 axios.interceptors.request.use((config) => {

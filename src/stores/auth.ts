@@ -1,7 +1,10 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import axios from "@/plugins/axios";
+import { useNotificationStore } from "./notifications";
 import type { User } from "@/types/index";
+import type { AxiosError } from "axios";
+import type { ApiErrorResponse } from "@/types";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref<User | null>(null);
@@ -21,15 +24,22 @@ export const useAuthStore = defineStore("auth", () => {
         axios.defaults.headers.common["Authorization"] = `Bearer ${token.value}`;
       }
 
+      const notificationStore = useNotificationStore();
+      notificationStore.success(`Connexion réussie, bienvenue ${response.data.user.name}!`);
+
       return {
         success: true,
         data: response.data,
       };
-    } catch (error: any) {
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      const notificationStore = useNotificationStore();
+      const message = axiosError?.response?.data?.message || "Erreur lors de la connexion";
+      notificationStore.handleApiError(axiosError, message);
       return {
         success: false,
-        status: error?.response?.status,
-        message: error?.response?.data?.message || "Erreur serveur",
+        status: axiosError?.response?.status,
+        message: message,
       };
     }
   }
@@ -45,9 +55,16 @@ export const useAuthStore = defineStore("auth", () => {
         localStorage.setItem("token", token.value);
         axios.defaults.headers.common["Authorization"] = `Bearer ${token.value}`;
       }
+
+      const notificationStore = useNotificationStore();
+      notificationStore.success("Inscription réussie!");
       return true;
     } catch (error) {
-      console.error(error);
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      const notificationStore = useNotificationStore();
+      const message = axiosError?.response?.data?.message || "Erreur lors de l'inscription";
+      notificationStore.handleApiError(axiosError, message);
+      if (import.meta.env.DEV) console.error(error);
       return false;
     }
   }
@@ -57,6 +74,8 @@ export const useAuthStore = defineStore("auth", () => {
     user.value = null;
     localStorage.removeItem("token");
     delete axios.defaults.headers.common["Authorization"];
+    const notificationStore = useNotificationStore();
+    notificationStore.info("Vous avez été déconnecté avec succès.");
   }
 
   async function fetchUser() {

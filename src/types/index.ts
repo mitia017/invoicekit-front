@@ -84,3 +84,19 @@ export interface Pagination {
 export interface InvoiceQuery {
   page?: number;
 }
+
+/**
+ * API Error Response Types
+ */
+export interface ApiErrorResponse {
+  message?: string;
+  errors?: Record<string, string[]>;
+}
+
+/**
+ * Revenue Item Response Type
+ */
+export interface RevenueResponse {
+  month: string;
+  total: number;
+}

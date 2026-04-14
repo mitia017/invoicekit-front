@@ -172,12 +172,14 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "@/plugins/axios";
 import { useCurrency } from "@/composables/useCurrency";
 import { useInvoiceStore } from "@/stores/invoices";
+import { useNotificationStore } from "@/stores/notifications";
 import type { Invoice, AxiosError } from "@/types";
 
 const route = useRoute();
 const router = useRouter();
 const { formatCurrency } = useCurrency();
 const { downloadPDF } = useInvoiceStore();
+const notificationStore = useNotificationStore();
 
 const invoice = ref<Invoice | null>(null);
 const loading = ref(true);
@@ -194,8 +196,7 @@ const fetchInvoice = async () => {
     const { data } = await axios.get<Invoice>(`/api/invoices/${getId()}`);
     invoice.value = data;
   } catch (err) {
-    console.error("Erreur chargement facture", err);
-    alert("Impossible de charger la facture.");
+    notificationStore.handleApiError(err, "Impossible de charger la facture.");
   } finally {
     loading.value = false;
   }
@@ -224,12 +225,11 @@ const sendInvoice = async () => {
 
     showSendModal.value = false;
     sendEmail.value = "";
+    notificationStore.success("Facture envoyée avec succès.");
     await fetchInvoice();
   } catch (err) {
     const error = err as AxiosError<{ message?: string }>;
-    console.error("Erreur envoi facture", error);
-
-    alert(error.response?.data?.message ?? "Échec de l'envoi.");
+    notificationStore.handleApiError(error, "Échec de l'envoi.");
   } finally {
     sending.value = false;
   }
@@ -249,9 +249,7 @@ const payInvoice = async () => {
     window.location.href = data.url;
   } catch (err) {
     const error = err as AxiosError<{ message?: string }>;
-    console.error("Erreur paiement", error);
-
-    alert(error.response?.data?.message ?? "Impossible de lancer le paiement.");
+    notificationStore.handleApiError(error, "Impossible de lancer le paiement.");
     paying.value = false;
   }
 };
@@ -260,13 +258,13 @@ const checkStripeReturn = () => {
   const status = route.query.payment;
 
   if (status === "success") {
-    alert("Paiement validé.");
+    notificationStore.success("Paiement validé.");
     fetchInvoice();
     router.replace({ query: {} });
   }
 
   if (status === "cancel") {
-    alert("Paiement annulé.");
+    notificationStore.warning("Paiement annulé.");
     router.replace({ query: {} });
   }
 };

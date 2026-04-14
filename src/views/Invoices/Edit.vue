@@ -19,6 +19,7 @@
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useInvoiceStore } from "@/stores/invoices";
+import { useNotificationStore } from "@/stores/notifications";
 import InvoiceForm from "@/components/invoices/InvoiceForm.vue";
 import axios from "@/plugins/axios";
 import type { InvoiceFormData } from "@/types";
@@ -29,6 +30,7 @@ type InvoiceData = InvoiceFormData & { id: number };
 const route = useRoute();
 const router = useRouter();
 const invoiceStore = useInvoiceStore();
+const notificationStore = useNotificationStore();
 
 const loading = ref(true);
 const editing = ref(false);
@@ -41,8 +43,8 @@ const loadInvoice = async () => {
     const invoice = await axios.get(`/api/invoices/${id}`);
     invoiceData.value = invoice.data;
   } catch (err) {
-    console.error("Erreur chargement facture", err);
-    alert("Impossible de charger la facture.");
+    notificationStore.handleApiError(err, "Impossible de charger la facture.");
+    loading.value = true;
   } finally {
     loading.value = false;
   }
@@ -64,13 +66,13 @@ const editFacture = async (data: InvoiceFormData) => {
   } catch (err) {
     const error = err as AxiosError<{ errors?: Record<string, string[]> }>;
 
-    if (error.invoice?.status === 422) {
-      errors.value = error.invoice.data?.errors ?? {};
+    if (error.response?.status === 422) {
+      errors.value = error.response.data?.errors ?? {};
+      notificationStore.handleValidationErrors(errors.value);
       return;
     }
 
-    console.error("Erreur mise à jour facture", error);
-    alert("Impossible de modifier la facture.");
+    notificationStore.handleApiError(error, "Impossible de modifier la facture.");
   } finally {
     editing.value = false;
   }

@@ -27,6 +27,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { useClientStore } from "@/stores/clients";
+import { useNotificationStore } from "@/stores/notifications";
+import type { Client, ApiErrorResponse } from "@/types";
+import type { AxiosError } from "axios";
 import type { Client } from "@/types";
 import { storeToRefs } from "pinia";
 
@@ -39,6 +42,7 @@ const emit = defineEmits<{
 }>();
 
 const clientStore = useClientStore();
+const notificationStore = useNotificationStore();
 const { clients } = storeToRefs(clientStore);
 const { fetchClients } = clientStore;
 const clientFilterSearch = ref("");
@@ -79,7 +83,9 @@ watch(
           const clientData = await clientStore.fetchClientById(selectedClientId);
           clientFilterSearch.value = clientData.name;
         } catch (e) {
-          console.error(e);
+          const axiosError = e as AxiosError<ApiErrorResponse>;
+          if (import.meta.env.DEV) console.error(axiosError);
+          notificationStore.handleApiError(axiosError, "Impossible de charger le client.");
         }
       }
     }

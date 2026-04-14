@@ -45,7 +45,10 @@
               <button @click="editClient(client)" class="text-blue-600 mr-2 dark:text-blue-400">
                 Modifier
               </button>
-              <button @click="deleteClient(client.id)" class="text-red-600 dark:text-red-400">
+              <button
+                @click="confirmDeleteClient(client.id)"
+                class="text-red-600 dark:text-red-400"
+              >
                 Supprimer
               </button>
             </td>
@@ -113,21 +116,38 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <ConfirmDialog
+      :is-open="showConfirmDelete"
+      title="Supprimer le client"
+      message="Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible."
+      action-label="Supprimer"
+      :is-loading="deleting"
+      @confirm="handleDeleteConfirm"
+      @cancel="handleDeleteCancel"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useClientStore } from "@/stores/clients";
+import { useNotificationStore } from "@/stores/notifications";
+import ConfirmDialog from "@/components/ui/ConfirmDialog.vue";
 import type { Client } from "@/types";
 import { storeToRefs } from "pinia";
 
 const clientStore = useClientStore();
+const notificationStore = useNotificationStore();
 
 const { clients } = storeToRefs(clientStore);
 const { createClient, updateClient, deleteClient, fetchClients } = clientStore;
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
+const showConfirmDelete = ref(false);
+const clientToDelete = ref<number | null>(null);
+const deleting = ref(false);
 const form = ref<Partial<Client>>({});
 const editingClient = ref<number | null>(null);
 const saving = ref(false);
@@ -158,7 +178,8 @@ const saveClient = async () => {
     closeModal();
     fetchClients();
   } catch (error) {
-    console.error(error);
+    const err = error as Error;
+    if (import.meta.env.DEV) console.error("Erreur lors de l'opération client:", err);
   } finally {
     saving.value = false;
   }
@@ -168,5 +189,33 @@ const editClient = (client: Client) => {
   form.value = { ...client };
   editingClient.value = client.id;
   showEditModal.value = true;
+};
+
+const confirmDeleteClient = (id: number) => {
+  clientToDelete.value = id;
+  showConfirmDelete.value = true;
+};
+
+const handleDeleteConfirm = async () => {
+  if (!clientToDelete.value) return;
+
+  deleting.value = true;
+
+  try {
+    await deleteClient(clientToDelete.value);
+    await fetchClients();
+    showConfirmDelete.value = false;
+  } catch (error) {
+    const err = error as Error;
+    if (import.meta.env.DEV) console.error("Erreur suppression:", err);
+  } finally {
+    deleting.value = false;
+    clientToDelete.value = null;
+  }
+};
+
+const handleDeleteCancel = () => {
+  showConfirmDelete.value = false;
+  clientToDelete.value = null;
 };
 </script>

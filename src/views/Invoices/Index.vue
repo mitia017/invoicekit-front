@@ -166,13 +166,25 @@
         </button>
       </div>
     </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <ConfirmDialog
+      :is-open="showConfirmDelete"
+      title="Supprimer la facture"
+      message="Êtes-vous sûr de vouloir supprimer cette facture ? Cette action est irréversible."
+      action-label="Supprimer"
+      :is-loading="deleting"
+      @confirm="handleDeleteConfirm"
+      @cancel="handleDeleteCancel"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { onMounted, computed, ref } from "vue";
 import { useInvoiceStore } from "@/stores/invoices";
 import { useCurrency } from "@/composables/useCurrency";
+import ConfirmDialog from "@/components/ui/ConfirmDialog.vue";
 import { storeToRefs } from "pinia";
 import type { InvoiceQuery } from "@/types";
 
@@ -181,6 +193,10 @@ const { invoices, pagination } = storeToRefs(invoiceStore);
 const { deleteInvoice, downloadPDF, fetchInvoices } = invoiceStore;
 
 const { formatCurrency } = useCurrency();
+
+const showConfirmDelete = ref(false);
+const invoiceToDelete = ref<number | null>(null);
+const deleting = ref(false);
 
 const statsByStatus = computed(() => {
   const stats = { draft: 0, sent: 0, paid: 0, overdue: 0 };
@@ -244,11 +260,32 @@ const loadInvoices = async (params: InvoiceQuery = {}) => {
   await fetchInvoices(params);
 };
 
-const confirmDelete = async (id: number) => {
-  if (!confirm("Supprimer cette facture ?")) return;
+const confirmDelete = (id: number) => {
+  invoiceToDelete.value = id;
+  showConfirmDelete.value = true;
+};
 
-  await deleteInvoice(id);
-  await loadInvoices();
+const handleDeleteConfirm = async () => {
+  if (!invoiceToDelete.value) return;
+
+  deleting.value = true;
+
+  try {
+    await deleteInvoice(invoiceToDelete.value);
+    await loadInvoices();
+    showConfirmDelete.value = false;
+  } catch (error) {
+    const err = error as Error;
+    if (import.meta.env.DEV) console.error("Erreur suppression:", err);
+  } finally {
+    deleting.value = false;
+    invoiceToDelete.value = null;
+  }
+};
+
+const handleDeleteCancel = () => {
+  showConfirmDelete.value = false;
+  invoiceToDelete.value = null;
 };
 
 onMounted(() => {

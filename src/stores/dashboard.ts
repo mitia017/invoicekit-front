@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "@/plugins/axios";
+import type { AxiosError } from "axios";
 
 export interface DashboardStats {
   total_revenue: number;
@@ -69,15 +70,20 @@ export const useDashboardStore = defineStore("dashboard", () => {
         ...statsRes.data,
       };
 
-      const revenueData = revenueRes.data;
+      const revenueData = revenueRes.data as RevenueItem[] | Record<string, RevenueItem>;
       revenue.value = Array.isArray(revenueData)
         ? revenueData
-        : Object.values(revenueData).sort((a: any, b: any) => a.month - b.month);
+        : Object.values(revenueData).sort((a: RevenueItem, b: RevenueItem) => {
+            const monthA = new Date(a.month).getTime();
+            const monthB = new Date(b.month).getTime();
+            return monthA - monthB;
+          });
 
       topClients.value = clientsRes.data;
       recentInvoices.value = invoicesRes.data;
-    } catch (e: any) {
-      error.value = e?.message || "Erreur chargement dashboard";
+    } catch (e) {
+      const axiosError = e as AxiosError;
+      error.value = axiosError?.message || "Erreur chargement dashboard";
     } finally {
       loading.value = false;
     }

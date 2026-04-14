@@ -10,12 +10,14 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useInvoiceStore } from "@/stores/invoices";
+import { useNotificationStore } from "@/stores/notifications";
 import InvoiceForm from "@/components/invoices/InvoiceForm.vue";
 import type { InvoiceFormData } from "@/types";
 import type { AxiosError } from "axios";
 
 const router = useRouter();
 const invoiceStore = useInvoiceStore();
+const notificationStore = useNotificationStore();
 
 const errors = ref<Record<string, string[]>>({});
 const creating = ref(false);
@@ -35,12 +37,11 @@ const createFacture = async (data: InvoiceFormData) => {
 
     if (error.response?.status === 422) {
       errors.value = error.response.data?.errors ?? {};
+      notificationStore.handleValidationErrors(errors.value);
       return;
     }
 
-    console.error("Erreur création facture", error);
-
-    alert("Impossible de créer la facture. Réessaie.");
+    notificationStore.handleApiError(error, "Impossible de créer la facture.");
   } finally {
     creating.value = false;
   }

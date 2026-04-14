@@ -161,6 +161,7 @@
 
 <script setup lang="ts">
 import { reactive, computed } from "vue";
+import { useNotificationStore } from "@/stores/notifications";
 import { useCurrency } from "@/composables/useCurrency";
 import ClientAutocomplete from "@/components/clients/ClientAutocomplete.vue";
 import type { InvoiceFormData, InvoiceItem } from "@/types";
@@ -176,6 +177,7 @@ const emit = defineEmits<{
 }>();
 
 const { formatCurrency } = useCurrency();
+const notificationStore = useNotificationStore();
 
 // Formulaire réactif : client_id peut être null (en attendant sélection)
 const form = reactive({
@@ -201,7 +203,7 @@ const removeItem = (index: number) => {
   if (form.items.length > 1) {
     form.items.splice(index, 1);
   } else {
-    alert("Au moins une ligne est requise");
+    notificationStore.warning("Au moins une ligne est requise");
   }
 };
 
@@ -231,12 +233,12 @@ const submit = () => {
   );
 
   if (validItems.length === 0) {
-    alert("Veuillez ajouter au moins une ligne de facture complète.");
+    notificationStore.warning("Veuillez ajouter au moins une ligne de facture complète.");
     return;
   }
 
   if (!form.client_id) {
-    alert("Veuillez sélectionner un client.");
+    notificationStore.warning("Veuillez sélectionner un client.");
     return;
   }
 
