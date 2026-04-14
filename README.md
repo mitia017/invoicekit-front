@@ -98,3 +98,7 @@ src/
 ## 📝 Licence
 
 Ce projet est sous licence MIT.
+
+---
+
+Créé Annick Fifaliana Mitia Raharilala - Optimisé par Copilot
