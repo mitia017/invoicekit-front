@@ -2,13 +2,13 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "@/plugins/axios";
 import { useNotificationStore } from "./notifications";
-import type { Invoice, InvoiceFormData, ApiErrorResponse } from "@/types";
+import type { Invoice, InvoiceFormData, ApiErrorResponse, Pagination } from "@/types";
 import type { AxiosError } from "axios";
 
 export const useInvoiceStore = defineStore("invoices", () => {
   const invoices = ref<Invoice[]>([]);
   const loading = ref(false);
-  const pagination = ref(null);
+  const pagination = ref<Pagination | null>(null);
 
   const fetchInvoices = async (params = {}) => {
     loading.value = true;
@@ -94,7 +94,7 @@ export const useInvoiceStore = defineStore("invoices", () => {
       const notificationStore = useNotificationStore();
       notificationStore.success("PDF téléchargé avec succès.");
     } catch (error) {
-      const axiosError = error as AxiosError;
+      const axiosError = error as AxiosError<ApiErrorResponse>;
       const notificationStore = useNotificationStore();
       notificationStore.handleApiError(axiosError, "Erreur lors du téléchargement du PDF");
       if (import.meta.env.DEV) console.error("Erreur téléchargement :", axiosError);

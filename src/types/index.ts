@@ -100,3 +100,21 @@ export interface RevenueResponse {
   month: string;
   total: number;
 }
+
+/**
+ * Dashboard Types
+ */
+export interface ClientStats {
+  id: number;
+  name: string;
+  invoices_count: number;
+  total_spent: number;
+}
+
+export interface RecentInvoiceItem {
+  id: number;
+  number: string;
+  client_name: string;
+  total: number;
+  created_at: string;
+}

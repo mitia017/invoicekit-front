@@ -31,9 +31,9 @@
 </template>
 
 <script setup lang="ts">
-import type { Client } from "@/types";
+import type { ClientStats } from "@/types";
 defineProps<{
-  clients: Client[];
+  clients: ClientStats[];
   formatCurrency: (v: number) => string;
 }>();
 </script>

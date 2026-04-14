@@ -22,10 +22,8 @@ import { useInvoiceStore } from "@/stores/invoices";
 import { useNotificationStore } from "@/stores/notifications";
 import InvoiceForm from "@/components/invoices/InvoiceForm.vue";
 import axios from "@/plugins/axios";
-import type { InvoiceFormData } from "@/types";
+import type { InvoiceFormData, ApiErrorResponse } from "@/types";
 import type { AxiosError } from "axios";
-
-type InvoiceData = InvoiceFormData & { id: number };
 
 const route = useRoute();
 const router = useRouter();
@@ -35,7 +33,7 @@ const notificationStore = useNotificationStore();
 const loading = ref(true);
 const editing = ref(false);
 const errors = ref<Record<string, string[]>>({});
-const invoiceData = ref<InvoiceData | null>(null);
+const invoiceData = ref<Partial<InvoiceFormData> | undefined>();
 
 const loadInvoice = async () => {
   try {
@@ -43,7 +41,11 @@ const loadInvoice = async () => {
     const invoice = await axios.get(`/api/invoices/${id}`);
     invoiceData.value = invoice.data;
   } catch (err) {
-    notificationStore.handleApiError(err, "Impossible de charger la facture.");
+    const error = err instanceof axios.AxiosError ? err : new axios.AxiosError("Unknown error");
+    notificationStore.handleApiError(
+      error as AxiosError<ApiErrorResponse>,
+      "Impossible de charger la facture.",
+    );
     loading.value = true;
   } finally {
     loading.value = false;
@@ -64,15 +66,24 @@ const editFacture = async (data: InvoiceFormData) => {
 
     router.push({ name: "invoices.list" });
   } catch (err) {
-    const error = err as AxiosError<{ errors?: Record<string, string[]> }>;
+    const error = err instanceof axios.AxiosError ? err : new axios.AxiosError("Unknown error");
+    const axiosError = error as AxiosError<ApiErrorResponse>;
 
     if (error.response?.status === 422) {
-      errors.value = error.response.data?.errors ?? {};
-      notificationStore.handleValidationErrors(errors.value);
+      const validationErrors = error.response.data as Record<string, string[] | string> | undefined;
+      if (validationErrors && typeof validationErrors === "object") {
+        // Convert any error format to our expected format
+        const formattedErrors: Record<string, string[]> = {};
+        for (const [key, value] of Object.entries(validationErrors)) {
+          formattedErrors[key] = Array.isArray(value) ? value : [value];
+        }
+        errors.value = formattedErrors;
+        notificationStore.handleValidationErrors(formattedErrors);
+      }
       return;
     }
 
-    notificationStore.handleApiError(error, "Impossible de modifier la facture.");
+    notificationStore.handleApiError(axiosError, "Impossible de modifier la facture.");
   } finally {
     editing.value = false;
   }

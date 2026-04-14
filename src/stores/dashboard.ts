@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "@/plugins/axios";
 import type { AxiosError } from "axios";
+import type { ClientStats, RecentInvoiceItem } from "@/types";
 
 export interface DashboardStats {
   total_revenue: number;
@@ -18,21 +19,6 @@ export interface RevenueItem {
   total: number;
 }
 
-export interface ClientStats {
-  id: number;
-  name: string;
-  invoices_count: number;
-  total_spent: number;
-}
-
-export interface RecentInvoice {
-  id: number;
-  number: string;
-  client_name: string;
-  total: number;
-  created_at: string;
-}
-
 export const useDashboardStore = defineStore("dashboard", () => {
   // state
   const stats = ref<DashboardStats>({
@@ -47,7 +33,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
 
   const revenue = ref<RevenueItem[]>([]);
   const topClients = ref<ClientStats[]>([]);
-  const recentInvoices = ref<RecentInvoice[]>([]);
+  const recentInvoices = ref<RecentInvoiceItem[]>([]);
 
   const loading = ref(false);
   const error = ref<string | null>(null);

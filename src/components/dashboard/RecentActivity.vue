@@ -33,9 +33,9 @@
 </template>
 
 <script setup lang="ts">
-import type { Invoice } from "@/types";
+import type { RecentInvoiceItem } from "@/types";
 defineProps<{
-  items: Invoice[];
+  items: RecentInvoiceItem[];
   formatCurrency: (v: number) => string;
 }>();
 </script>

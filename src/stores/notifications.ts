@@ -9,36 +9,36 @@ export const useNotificationStore = defineStore("notifications", () => {
   /**
    * SUCCESS
    */
-  const success = (message: string, duration = 3000) => {
-    toast.success(message, { duration });
+  const success = (message: string, timeout = 3000) => {
+    toast.success(message, { timeout });
   };
 
   /**
    * ERROR
    */
-  const error = (message: string, duration = 5000) => {
-    toast.error(message, { duration });
+  const error = (message: string, timeout = 5000) => {
+    toast.error(message, { timeout });
   };
 
   /**
    * DANGER (for critical actions like delete)
    */
-  const danger = (message: string, duration = 5000) => {
-    toast.error(message, { duration });
+  const danger = (message: string, timeout = 5000) => {
+    toast.error(message, { timeout });
   };
 
   /**
    * WARNING
    */
-  const warning = (message: string, duration = 4000) => {
-    toast.warning(message, { duration });
+  const warning = (message: string, timeout = 4000) => {
+    toast.warning(message, { timeout });
   };
 
   /**
    * INFO
    */
-  const info = (message: string, duration = 3000) => {
-    toast.info(message, { duration });
+  const info = (message: string, timeout = 3000) => {
+    toast.info(message, { timeout });
   };
 
   /**

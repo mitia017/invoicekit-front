@@ -85,8 +85,8 @@
           <!-- Totaux -->
           <div class="text-right border-t pt-4">
             <p class="dark:text-gray-300">Sous-total : {{ formatCurrency(invoice.subtotal) }}</p>
-            <p v-if="invoice.discount_amount > 0" class="dark:text-gray-300">
-              Remise : -{{ formatCurrency(invoice.discount_amount) }}
+            <p v-if="(invoice.discount_amount ?? 0) > 0" class="dark:text-gray-300">
+              Remise : -{{ formatCurrency(invoice.discount_amount ?? 0) }}
             </p>
             <p class="dark:text-gray-300">
               TVA ({{ invoice.tax_rate }}%) : {{ formatCurrency(invoice.tax_amount) }}
@@ -203,7 +203,11 @@ const fetchInvoice = async () => {
     const { data } = await axios.get<Invoice>(`/api/invoices/${getId()}`);
     invoice.value = data;
   } catch (err) {
-    notificationStore.handleApiError(err, "Impossible de charger la facture.");
+    const error = err instanceof axios.AxiosError ? err : new axios.AxiosError("Unknown error");
+    notificationStore.handleApiError(
+      error as AxiosError<ApiErrorResponse>,
+      "Impossible de charger la facture.",
+    );
   } finally {
     loading.value = false;
   }

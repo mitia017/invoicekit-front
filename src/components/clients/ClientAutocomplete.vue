@@ -65,7 +65,7 @@ const openSearch = () => {
   }
 };
 
-const selectClient = (clientItem) => {
+const selectClient = (clientItem: Client) => {
   emit("update:modelValue", clientItem.id);
   clientFilterSearch.value = clientItem.name;
   showSuggestions.value = false;
