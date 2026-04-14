@@ -28,7 +28,7 @@
 import { ref, computed, watch } from "vue";
 import { useClientStore } from "@/stores/clients";
 import { useNotificationStore } from "@/stores/notifications";
-import type { Client, ApiErrorResponse } from "@/types";
+import type { ApiErrorResponse } from "@/types";
 import type { AxiosError } from "axios";
 import type { Client } from "@/types";
 import { storeToRefs } from "pinia";
