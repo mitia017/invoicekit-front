@@ -2,7 +2,7 @@
   <div class="bg-gray-100 dark:bg-gray-800 p-6 rounded-xl shadow-sm">
     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Évolution des revenus</h2>
 
-    <div style="height: 375px">
+    <div class="h-[150px] sm:h-[280px] md:h-[300px] lg:h-[375px]">
       <canvas ref="canvas"></canvas>
     </div>
   </div>
